@@ -1,2 +1,15 @@
-# 3D-Voting-Display
-投票结果炫酷展示！🥳
+# umi project
+
+## Getting Started
+
+Install dependencies,
+
+```bash
+$ yarn
+```
+
+Start the dev server,
+
+```bash
+$ yarn start
+```
