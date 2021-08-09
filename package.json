@@ -21,10 +21,12 @@
   },
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
-    "@types/three": "^0.130.0",
+    "@types/three": "0.97.0",
     "react": "17.x",
     "react-dom": "17.x",
-    "three": "^0.130.1",
+    "sprite-extend-3d": "^0.14.6",
+    "spritejs": "^3.7.31",
+    "three": "0.97.1",
     "umi": "^3.5.8"
   },
   "devDependencies": {

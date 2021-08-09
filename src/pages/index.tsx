@@ -1,9 +1,12 @@
-import styles from './index.less';
+import React from 'react';
+import Show from '@/components/Show';
 
-export default function IndexPage() {
+const App = () => {
   return (
     <div>
-      <h1 className={styles.title}>Page index</h1>
+      <Show />
     </div>
   );
-}
+};
+
+export default App;
