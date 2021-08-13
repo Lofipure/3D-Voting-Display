@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { IOption, IGlobalShowOptions } from "./type";
 
+const SPEED = 3;
 export default class GlobalShow {
   scene: THREE.Scene | undefined;
   camera: THREE.PerspectiveCamera | undefined;
@@ -39,7 +40,7 @@ export default class GlobalShow {
     this.camera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
-      0.1,
+      0.001,
       100,
     );
     this.clock = new THREE.Clock();
@@ -48,7 +49,7 @@ export default class GlobalShow {
     });
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.minDistance = 0.7;
+    this.controls.minDistance = 0.01;
     this.controls.maxDistance = 25;
     this.controls.minPolarAngle = 0;
     this.controls.maxPolarAngle = Math.PI / 2.1;
@@ -75,8 +76,8 @@ export default class GlobalShow {
     directionalLight.shadow.camera.top = d;
     directionalLight.shadow.camera.bottom = -d;
 
-    directionalLight.shadow.camera.near = 1;
-    directionalLight.shadow.camera.far = 20;
+    directionalLight.shadow.camera.near = 0.01;
+    directionalLight.shadow.camera.far = 100;
 
     directionalLight.shadow.mapSize.x = 1024;
     directionalLight.shadow.mapSize.y = 1024;
@@ -96,6 +97,16 @@ export default class GlobalShow {
     this.scene?.add(this.floor);
   }
 
+  func(xAxisValue: number) {
+    const cycle = (5 * Math.PI) / 6;
+    const step = parseInt(String(xAxisValue / cycle));
+    const value = xAxisValue % cycle;
+    return {
+      yAxisValue: 2 * Math.sin(value) + step,
+      step: step,
+    };
+  }
+
   drawElement() {
     const time = this.clock?.getElapsedTime();
     if (!this.scene || !this.camera || !this.renderer || !time) return;
@@ -107,7 +118,7 @@ export default class GlobalShow {
             color: 0xcccccc,
           });
           selection.geometry.translate(
-            optionsIndex * 8,
+            optionsIndex * 4,
             0.3,
             selectionIndex * 2,
           );
@@ -116,13 +127,19 @@ export default class GlobalShow {
             selection.geometry,
             selection.material,
           );
+          selection.currentHeight = 0;
           selection.mesh.castShadow = true;
           this.scene?.add(selection.mesh);
+        } else if (selection.currentHeight) {
+          null;
         } else {
-          selection.mesh.castShadow = true;
-          selection.mesh.position.y = Math.abs(
-            Math.sin(selectionIndex * 0.5 + time * 2.5),
-          );
+          const xAsisValue =
+            time * SPEED + optionsIndex * 0.2 + selectionIndex * 0.3;
+          const { yAxisValue, step } = this.func(xAsisValue);
+          selection.mesh.position.y = Math.abs(yAxisValue * 0.3);
+          if (step == selection.selectedNumber) {
+            selection.currentHeight = yAxisValue;
+          }
         }
       });
     });

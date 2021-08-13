@@ -4,6 +4,7 @@ export interface IRenderMesh {
   geometry?: THREE.SphereGeometry;
   material?: THREE.MeshLambertMaterial;
   mesh?: THREE.Mesh;
+  currentHeight?: number;
 }
 
 export interface IData {

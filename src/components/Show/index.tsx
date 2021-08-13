@@ -15,38 +15,38 @@ const Show: React.FC = () => {
               label: "1",
               selectedNumber: 18,
             },
-            {
-              id: 2,
-              label: "2",
-              selectedNumber: 10,
-            },
+            // {
+            //   id: 2,
+            //   label: "2",
+            //   selectedNumber: 10,
+            // },
           ],
         },
-        {
-          label: "Test Two",
-          selectionResult: [
-            {
-              id: 3,
-              label: "3",
-              selectedNumber: 2,
-            },
-            {
-              id: 4,
-              label: "4",
-              selectedNumber: 15,
-            },
-            {
-              id: 5,
-              label: "5",
-              selectedNumber: 18,
-            },
-            {
-              id: 6,
-              label: "6",
-              selectedNumber: 18,
-            },
-          ],
-        },
+        // {
+        //   label: "Test Two",
+        //   selectionResult: [
+        //     {
+        //       id: 3,
+        //       label: "3",
+        //       selectedNumber: 2,
+        //     },
+        //     {
+        //       id: 4,
+        //       label: "4",
+        //       selectedNumber: 15,
+        //     },
+        //     {
+        //       id: 5,
+        //       label: "5",
+        //       selectedNumber: 18,
+        //     },
+        //     {
+        //       id: 6,
+        //       label: "6",
+        //       selectedNumber: 18,
+        //     },
+        //   ],
+        // },
       ],
     });
   });
