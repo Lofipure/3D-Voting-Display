@@ -86,7 +86,7 @@ const Create: React.FC<ICreate> = (props) => {
                                 className={styles["create-selection__number"]}
                                 name={[selection.name, "selectedNumber"]}
                               >
-                                <InputNumber placeholder="Selection Name" />
+                                <InputNumber placeholder="Selected Number" />
                               </Form.Item>
                               {selections.length > 1 && (
                                 <Minus
@@ -124,7 +124,7 @@ const Create: React.FC<ICreate> = (props) => {
           onSuccess(form.getFieldsValue());
         }}
       >
-        Get Data
+        🎉
       </Button>
     </div>
   );

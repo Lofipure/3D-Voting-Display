@@ -1,9 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { IOption, IGlobalShowOptions, ISelection } from "@/type";
+import { Sky } from "three/examples/jsm/objects/Sky";
+// @ts-ignore
+import fontConfig from "three/examples/fonts/helvetiker_bold.typeface.json";
 import _ from "lodash";
 
-const SPEED = 3;
+const SPEED = 4;
 export default class GlobalShow {
   scene: THREE.Scene | undefined;
   camera: THREE.PerspectiveCamera | undefined;
@@ -16,23 +19,23 @@ export default class GlobalShow {
   floor: THREE.Mesh | undefined;
   controls: OrbitControls | undefined;
   clock: THREE.Clock | undefined;
+  sky: Sky | undefined;
+  sun: THREE.Vector3 | undefined;
 
   constructor(options: IGlobalShowOptions) {
     this.name = options.name;
     this.options = options.options;
     this.background = options.backgroundColor;
     this.envInit();
-
     const _this = this;
     function render() {
       if (!_this.scene || !_this.camera) return;
-
       requestAnimationFrame(render);
       _this.camera.lookAt(_this.scene.position);
-      _this.camera.updateMatrixWorld();
 
       _this.drawFloor();
       _this.drawElement();
+      _this.createText();
       _this.controls?.update();
       _this.renderer?.render(_this.scene, _this.camera);
     }
@@ -63,6 +66,10 @@ export default class GlobalShow {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor(this.background);
     this.renderer.shadowMap.enabled = true;
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.5;
+
     document.body.appendChild(this.renderer.domElement);
 
     this.camera.position.set(5, 5, 20);
@@ -86,6 +93,8 @@ export default class GlobalShow {
 
     directionalLight.shadow.mapSize.x = 1024;
     directionalLight.shadow.mapSize.y = 1024;
+
+    // this.initSky();
   }
 
   drawFloor() {
@@ -146,7 +155,6 @@ export default class GlobalShow {
           }
         } else {
           const xAsisValue = time * SPEED;
-          // time * SPEED + optionsIndex * 0.2 + selectionIndex * 0.3;
           const { yAxisValue, step } = this.jumpFunction(xAsisValue);
           selection.mesh.position.y = Math.abs(yAxisValue * 0.3);
           if (step == selection.selectedNumber) {
@@ -159,5 +167,82 @@ export default class GlobalShow {
 
   createWinnerStyle(selection: ISelection) {
     selection.material?.color.set("rgb(255,215,0)");
+  }
+
+  initSky() {
+    if (!this.scene || !this.renderer || !this.camera) return;
+    this.sky = new Sky();
+    this.sky.scale.setScalar(450000);
+    this.scene.add(this.sky);
+
+    this.sun = new THREE.Vector3();
+
+    const effectController = {
+      turbidity: 10,
+      rayleigh: 3,
+      mieCoefficient: 0.005,
+      mieDirectionalG: 0.7,
+      elevation: 2,
+      azimuth: 180,
+      exposure: this.renderer.toneMappingExposure,
+    };
+
+    const uniforms = this.sky.material.uniforms;
+    uniforms["turbidity"].value = effectController.turbidity;
+    uniforms["rayleigh"].value = effectController.rayleigh;
+    uniforms["mieCoefficient"].value = effectController.mieCoefficient;
+    uniforms["mieDirectionalG"].value = effectController.mieDirectionalG;
+
+    const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+    const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+
+    this.sun.setFromSphericalCoords(1, phi, theta);
+
+    uniforms["sunPosition"].value.copy(this.sun);
+
+    this.renderer.toneMappingExposure = effectController.exposure;
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  createText() {
+    if (!this.scene) return;
+    const loader = new THREE.FontLoader();
+    console.log("kankan", fontConfig);
+    loader.load(
+      fontConfig,
+      (font) => {
+        console.log("kankan", font);
+        const textGeo = new THREE.TextGeometry(this.name, {
+          font: font,
+          size: 200,
+          height: 50,
+          curveSegments: 12,
+          bevelThickness: 2,
+          bevelSize: 5,
+          bevelEnabled: true,
+        });
+        textGeo.computeBoundingBox();
+        const centerOffset =
+          -0.5 * (textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x);
+
+        const textMaterial = new THREE.MeshPhongMaterial({
+          color: 0xff0000,
+          specular: 0xffffff,
+        });
+
+        const mesh = new THREE.Mesh(textGeo, textMaterial);
+        mesh.position.x = centerOffset;
+        mesh.position.y = -250 + 67;
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        this.scene?.add(mesh);
+      },
+      () => {},
+      (e) => {
+        console.log("ERROR", e);
+      },
+    );
   }
 }
