@@ -1,0 +1,45 @@
+@form-element-height: 34px;
+@form-select-line-height: 32px;
+@form-input-border-radius: 4px;
+
+.ant-form-item {
+  margin-right: 12px;
+  margin-bottom: 0;
+
+  .ant-input,
+  .ant-select-selector,
+  .ant-cascader-picker,
+  .ant-picker,
+  .ant-input-affix-wrapper,
+  .ant-input-number {
+    height: @form-element-height !important;
+    border-radius: @form-input-border-radius !important;
+    border-color: #e0e0e0;
+
+    .ant-input,
+    .ant-input-number-input-wrap {
+      height: 100% !important;
+    }
+
+    input {
+      height: 100% !important;
+
+      &::placeholder {
+        font-size: 14px !important;
+        line-height: @form-element-height;
+        color: #c1c1c1;
+      }
+    }
+  }
+
+  .ant-select-selection-placeholder {
+    font-size: 14px !important;
+    line-height: @form-select-line-height !important;
+    color: #c1c1c1;
+  }
+
+  .ant-cascader-input {
+    border-radius: @form-input-border-radius !important;
+    border-color: #e0e0e0;
+  }
+}

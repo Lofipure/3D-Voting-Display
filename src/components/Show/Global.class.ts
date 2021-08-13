@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { IOption, IGlobalShowOptions } from "./type";
+import { IOption, IGlobalShowOptions, ISelection } from "@/type";
+import _ from "lodash";
 
 const SPEED = 3;
 export default class GlobalShow {
@@ -17,18 +18,22 @@ export default class GlobalShow {
   clock: THREE.Clock | undefined;
 
   constructor(options: IGlobalShowOptions) {
-    const _this = this;
     this.name = options.name;
     this.options = options.options;
     this.background = options.backgroundColor;
     this.envInit();
 
+    const _this = this;
     function render() {
       if (!_this.scene || !_this.camera) return;
+
       requestAnimationFrame(render);
-      _this.controls?.update();
+      _this.camera.lookAt(_this.scene.position);
+      _this.camera.updateMatrixWorld();
+
       _this.drawFloor();
       _this.drawElement();
+      _this.controls?.update();
       _this.renderer?.render(_this.scene, _this.camera);
     }
 
@@ -97,7 +102,7 @@ export default class GlobalShow {
     this.scene?.add(this.floor);
   }
 
-  func(xAxisValue: number) {
+  jumpFunction(xAxisValue: number) {
     const cycle = (5 * Math.PI) / 6;
     const step = parseInt(String(xAxisValue / cycle));
     const value = xAxisValue % cycle;
@@ -111,6 +116,7 @@ export default class GlobalShow {
     const time = this.clock?.getElapsedTime();
     if (!this.scene || !this.camera || !this.renderer || !time) return;
     this.options.forEach((options, optionsIndex) => {
+      const tops: Array<ISelection> = [];
       options.selectionResult.forEach((selection, selectionIndex) => {
         if (!selection.mesh) {
           selection.geometry = new THREE.SphereGeometry(0.3, 32, 16);
@@ -131,11 +137,17 @@ export default class GlobalShow {
           selection.mesh.castShadow = true;
           this.scene?.add(selection.mesh);
         } else if (selection.currentHeight) {
-          null;
+          tops.push(selection);
+          if (tops.length === options.selectionResult.length) {
+            const winnerScore = _.max(tops.map((item) => item.selectedNumber));
+            tops
+              .filter((item) => item.selectedNumber == winnerScore)
+              .forEach((item) => this.createWinnerStyle(item));
+          }
         } else {
-          const xAsisValue =
-            time * SPEED + optionsIndex * 0.2 + selectionIndex * 0.3;
-          const { yAxisValue, step } = this.func(xAsisValue);
+          const xAsisValue = time * SPEED;
+          // time * SPEED + optionsIndex * 0.2 + selectionIndex * 0.3;
+          const { yAxisValue, step } = this.jumpFunction(xAsisValue);
           selection.mesh.position.y = Math.abs(yAxisValue * 0.3);
           if (step == selection.selectedNumber) {
             selection.currentHeight = yAxisValue;
@@ -143,5 +155,9 @@ export default class GlobalShow {
         }
       });
     });
+  }
+
+  createWinnerStyle(selection: ISelection) {
+    selection.material?.color.set("rgb(255,215,0)");
   }
 }
