@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { IOption, IGlobalShowOptions, ISelection } from "@/type";
+import { IOption, IGlobalShowOptions, ISelection, IGlobal } from "@/type";
 import { Sky } from "three/examples/jsm/objects/Sky";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSM } from "three/examples/jsm/csm/CSM";
@@ -8,7 +8,7 @@ import { HorseModel, FlamingoModel, fontConfig } from "@/assets/models";
 import _ from "lodash";
 
 const SPEED = 4;
-export default class GlobalShow {
+export default class GlobalShow implements IGlobal {
   scene: THREE.Scene | undefined;
   camera: THREE.PerspectiveCamera | undefined;
   renderer: THREE.WebGLRenderer | undefined;
@@ -32,13 +32,25 @@ export default class GlobalShow {
       optionName: string;
     }
   >;
-
+  container: HTMLDivElement;
+  onComplete: (
+    list: Array<
+      ISelection & {
+        optionName: string;
+      }
+    >,
+  ) => void;
   constructor(options: IGlobalShowOptions) {
+    options.options.forEach((option, optionIndex) => {
+      option.selectionResult.forEach((select, selectIndex) => {
+        select.id = `${optionIndex}_${selectIndex}`;
+      });
+    });
     this.name = options.name;
     this.options = options.options;
     this.background = options.backgroundColor;
     this.gltfLoader = new GLTFLoader();
-
+    this.container = options.container;
     this.size = options.options.length;
     this.winnerArray = new Set<
       ISelection & {
@@ -46,7 +58,7 @@ export default class GlobalShow {
       }
     >([]);
     this.indexSet = new Set<number>([]);
-
+    this.onComplete = options.onComplete;
     this.envInit();
 
     const _this = this;
@@ -96,7 +108,8 @@ export default class GlobalShow {
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.5;
-    document.body.appendChild(this.renderer.domElement);
+
+    this.container.appendChild(this.renderer.domElement);
   }
 
   /**
@@ -149,7 +162,7 @@ export default class GlobalShow {
    * 初始化文字 🐣
    */
   async initText() {
-    return new Promise((resolve: any) => {
+    return new Promise((resolve: (params: () => void) => void) => {
       const loader = new THREE.FontLoader();
       loader.load(fontConfig, (font) => {
         const textGeo = new THREE.TextGeometry(this.name, {
@@ -184,7 +197,7 @@ export default class GlobalShow {
 
   async initAnimals(modelUrl: string, height: number) {
     if (!this.mixer) return;
-    return new Promise((resolve: any) => {
+    return new Promise((resolve: (params: () => void) => void) => {
       this.gltfLoader.load(modelUrl, (gltf) => {
         const mesh = gltf.scene.children[0];
         mesh.scale.set(0.05, 0.05, 0.05);
@@ -216,7 +229,7 @@ export default class GlobalShow {
       this.initAnimals(FlamingoModel, 20),
       this.initAnimals(HorseModel, 2.5),
     ]).then((resolves) => {
-      resolves.forEach((item: any) => item?.());
+      resolves.forEach((item) => item?.());
     });
 
     this.initLight();
@@ -277,12 +290,20 @@ export default class GlobalShow {
               .filter((item) => item.selectedNumber == winnerScore)
               .forEach((item) => {
                 this.createWinnerStyle(item);
-                this.winnerArray.add({
-                  ...item,
-                  optionName: options.label,
-                });
+                if (
+                  !Array.from(this.winnerArray)
+                    .map((item) => item.id)
+                    .includes(item.id)
+                ) {
+                  this.winnerArray.add({
+                    ...item,
+                    optionName: options.label,
+                  });
+                }
                 if (this.indexSet.size === this.size) {
-                  // END
+                  setTimeout(() => {
+                    this.onComplete?.(Array.from(this.winnerArray));
+                  }, 1000);
                 }
               });
           }
@@ -344,5 +365,9 @@ export default class GlobalShow {
 
     this.renderer.toneMappingExposure = effectController.exposure;
     this.renderer.render(this.scene, this.camera);
+  }
+
+  remove() {
+    this.renderer?.domElement.remove();
   }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input, InputNumber, Modal } from "antd";
+import { Button, Form, Input, InputNumber, message, Modal } from "antd";
 import { IData } from "@/type";
 import { Plus, Minus } from "@icon-park/react";
 import styles from "./index.less";
@@ -15,11 +15,17 @@ const Create: React.FC<ICreate> = (props) => {
     <div className={styles["create"]}>
       <Form form={form}>
         <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "这个你不填?",
+            },
+          ]}
           name="name"
           label="Voting theme"
           className={styles["create-header"]}
         >
-          <Input />
+          <Input placeholder="举个🌰：第三届猕猴桃🥝幼儿园颁奖典礼" />
         </Form.Item>
         <Form.List
           name="options"
@@ -42,28 +48,37 @@ const Create: React.FC<ICreate> = (props) => {
                   <div className={styles["create-options"]}>
                     <div className={styles["create-options__header"]}>
                       <Form.Item
+                        rules={[
+                          {
+                            required: true,
+                            message: "这个你不填我不好办事儿啊。",
+                          },
+                        ]}
                         name={[option.name, "label"]}
                         className={styles["create-options__header__input"]}
                       >
-                        <Input placeholder="Options Name" />
+                        <Input placeholder="举个🌰：安安静静睡午觉奖" />
                       </Form.Item>
-                      {optionIndex == options.length - 1 && (
-                        <Button
-                          onClick={() => {
-                            addOptions({
-                              label: "",
-                              selectionResult: [
-                                {
-                                  label: "",
-                                  selectedNumber: undefined,
-                                },
-                              ],
-                            });
-                          }}
-                        >
-                          Add Options
-                        </Button>
-                      )}
+                      <Button.Group>
+                        {optionIndex == options.length - 1 && (
+                          <Button
+                            type="primary"
+                            onClick={() => {
+                              addOptions({
+                                label: "",
+                                selectionResult: [
+                                  {
+                                    label: "",
+                                    selectedNumber: undefined,
+                                  },
+                                ],
+                              });
+                            }}
+                          >
+                            再来一个！
+                          </Button>
+                        )}
+                      </Button.Group>
                     </div>
                     <Form.List name={[option.name, "selectionResult"]}>
                       {(
@@ -77,16 +92,28 @@ const Create: React.FC<ICreate> = (props) => {
                               key={selection.key}
                             >
                               <Form.Item
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "这个你不填我不好办事儿啊。",
+                                  },
+                                ]}
                                 name={[selection.name, "label"]}
                                 className={styles["create-selection__label"]}
                               >
-                                <Input placeholder="Selection Name" />
+                                <Input placeholder="举个🌰：小王小朋友" />
                               </Form.Item>
                               <Form.Item
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "这个你不填你还图个啥。",
+                                  },
+                                ]}
                                 className={styles["create-selection__number"]}
                                 name={[selection.name, "selectedNumber"]}
                               >
-                                <InputNumber placeholder="Selected Number" />
+                                <InputNumber placeholder="举个🌰：32" />
                               </Form.Item>
                               {selections.length > 1 && (
                                 <Minus
@@ -122,7 +149,14 @@ const Create: React.FC<ICreate> = (props) => {
       <Button.Group>
         <Button
           onClick={() => {
-            onSuccess(form.getFieldsValue());
+            form
+              .validateFields()
+              .then(() => {
+                onSuccess(form.getFieldsValue());
+              })
+              .catch(() => {
+                message.error("你这表单叫填好了???💢");
+              });
           }}
         >
           🎉
@@ -132,11 +166,11 @@ const Create: React.FC<ICreate> = (props) => {
           onClick={() => {
             Modal.warn({
               title: "注意事项",
-              content: "所有的文字展示目前只支持英文",
+              content: "Voting theme 只支持英文。(中文的.ttf老是不成功)😮‍💨",
             });
           }}
         >
-          🤔 谁不点谁吃亏
+          🤔 谁不点我谁吃亏
         </Button>
       </Button.Group>
     </div>

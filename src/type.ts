@@ -25,4 +25,16 @@ export interface ISelection extends IRenderMesh {
 
 export interface IGlobalShowOptions extends IData {
   backgroundColor: string;
+  container: HTMLDivElement;
+  onComplete: (
+    list: Array<
+      ISelection & {
+        optionName: string;
+      }
+    >,
+  ) => void;
+}
+
+export interface IGlobal {
+  remove: () => void;
 }

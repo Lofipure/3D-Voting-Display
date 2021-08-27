@@ -23,6 +23,9 @@ const App = () => {
           backgroundColor="#efefef"
           name={votingData?.name ?? ""}
           options={votingData?.options ?? []}
+          onComplete={() => {
+            steStep(1);
+          }}
         />
       )}
     </div>
