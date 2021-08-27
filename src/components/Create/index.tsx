@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input, InputNumber } from "antd";
+import { Button, Form, Input, InputNumber, Modal } from "antd";
 import { IData } from "@/type";
 import { Plus, Minus } from "@icon-park/react";
 import styles from "./index.less";
@@ -119,13 +119,26 @@ const Create: React.FC<ICreate> = (props) => {
           )}
         </Form.List>
       </Form>
-      <Button
-        onClick={() => {
-          onSuccess(form.getFieldsValue());
-        }}
-      >
-        🎉
-      </Button>
+      <Button.Group>
+        <Button
+          onClick={() => {
+            onSuccess(form.getFieldsValue());
+          }}
+        >
+          🎉
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            Modal.warn({
+              title: "注意事项",
+              content: "所有的文字展示目前只支持英文",
+            });
+          }}
+        >
+          🤔 谁不点谁吃亏
+        </Button>
+      </Button.Group>
     </div>
   );
 };

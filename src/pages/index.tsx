@@ -7,16 +7,10 @@ import "./global.less";
 const App = () => {
   const [votingData, setVotingData] = React.useState<IData>();
   const [step, steStep] = React.useState<number>(1);
-  React.useEffect(() => {}, []);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   return (
-    <div>
-      {/* <Create
-        onSuccess={(value) => {
-          setVotingData(value);
-        }}
-      /> */}
-      {/* <Show /> */}
+    <div ref={containerRef}>
       {step == 1 ? (
         <Create
           onSuccess={(value) => {

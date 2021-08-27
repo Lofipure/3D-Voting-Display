@@ -1,7 +1,7 @@
 type Key = number | string;
 
 export interface IRenderMesh {
-  geometry?: THREE.SphereGeometry;
+  geometry?: THREE.BoxGeometry;
   material?: THREE.MeshLambertMaterial;
   mesh?: THREE.Mesh;
   currentHeight?: number;
