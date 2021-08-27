@@ -1,15 +1,2 @@
-# umi project
-
-## Getting Started
-
-Install dependencies,
-
-```bash
-$ yarn
-```
-
-Start the dev server,
-
-```bash
-$ yarn start
-```
+### 3D-Voting-Display
+> Under development,please waiting
