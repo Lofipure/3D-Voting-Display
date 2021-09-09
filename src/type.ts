@@ -33,6 +33,7 @@ export interface IGlobalShowOptions extends IData {
       }
     >,
   ) => void;
+  onReady: () => void;
 }
 
 export interface IGlobal {

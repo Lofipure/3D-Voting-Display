@@ -1,11 +1,11 @@
 import * as THREE from "three";
+import _ from "lodash";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { IOption, IGlobalShowOptions, ISelection, IGlobal } from "@/type";
 import { Sky } from "three/examples/jsm/objects/Sky";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSM } from "three/examples/jsm/csm/CSM";
+import { IOption, IGlobalShowOptions, ISelection, IGlobal } from "@/type";
 import { HorseModel, FlamingoModel, fontConfig } from "@/assets/models";
-import _ from "lodash";
 
 const SPEED = 4;
 export default class GlobalShow implements IGlobal {
@@ -40,10 +40,13 @@ export default class GlobalShow implements IGlobal {
       }
     >,
   ) => void;
+  onReady: () => void;
+
   constructor(options: IGlobalShowOptions) {
     options.options.forEach((option, optionIndex) => {
       option.selectionResult.forEach((select, selectIndex) => {
         select.id = `${optionIndex}_${selectIndex}`;
+        select.selectedNumber += 1;
       });
     });
     this.name = options.name;
@@ -59,6 +62,7 @@ export default class GlobalShow implements IGlobal {
     >([]);
     this.indexSet = new Set<number>([]);
     this.onComplete = options.onComplete;
+    this.onReady = options.onReady;
     this.envInit();
 
     const _this = this;
@@ -108,8 +112,6 @@ export default class GlobalShow implements IGlobal {
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.5;
-
-    this.container.appendChild(this.renderer.domElement);
   }
 
   /**
@@ -237,6 +239,13 @@ export default class GlobalShow implements IGlobal {
     this.initCsmAndFloor();
 
     this.clock = new THREE.Clock(); // 🤔 加一个时钟算动画
+
+    this.onReady?.();
+
+    if (!this.renderer) return;
+    this.container.appendChild(this.renderer.domElement);
+
+    await setTimeout(() => {}, 1000);
   }
 
   /**
@@ -264,14 +273,14 @@ export default class GlobalShow implements IGlobal {
       const tops: Array<ISelection> = [];
       options.selectionResult.forEach((selection, selectionIndex) => {
         if (!selection.mesh) {
-          selection.geometry = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+          selection.geometry = new THREE.BoxGeometry(1, 1, 1);
           selection.material = new THREE.MeshLambertMaterial({
             color: 0xcccccc,
           });
           selection.geometry.translate(
-            optionsIndex * 8,
-            0.3,
-            selectionIndex * 4,
+            optionsIndex * 20,
+            0.5,
+            selectionIndex * 6,
           );
 
           selection.mesh = new THREE.Mesh(
@@ -323,9 +332,9 @@ export default class GlobalShow implements IGlobal {
    * 每组的第一名的样式 🏅️
    */
   createWinnerStyle(selection: ISelection) {
-    const { material, mesh } = selection;
+    const { material } = selection;
     if (!material) return;
-
+    console.log("kankan material", material);
     material?.color.set("rgb(255,215,0)");
   }
 
@@ -368,6 +377,7 @@ export default class GlobalShow implements IGlobal {
   }
 
   remove() {
+    this.scene?.remove();
     this.renderer?.domElement.remove();
   }
 }

@@ -11,6 +11,7 @@ export interface ICreate {
 const Create: React.FC<ICreate> = (props) => {
   const { onSuccess } = props;
   const [form] = Form.useForm<IData>();
+
   return (
     <div className={styles["create"]}>
       <Form form={form}>
